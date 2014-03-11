@@ -3,11 +3,14 @@
 
 #include <fstream>
 #include <iostream>
+#include <regex>
 #include <sstream>
 #include <string>
 #include <vector>
 
 #include "defines.hpp"
+
+typedef std::string Note;
 
 class App {
 public:
@@ -16,12 +19,13 @@ public:
 
 private:
     std::vector<std::vector<std::string>> blocks;
-    std::vector<std::vector<std::vector<std::string>>> parsedBlocks;
+    std::vector<std::vector<std::vector<Note>>> parsedBlocks;
 
     int parseArgs(int argc, char* argv[], std::string& ifname, std::string& ofname);
     int readInput(std::ifstream& ifile);
     int parseBlocks();
     int parseBlock(std::vector<std::string>& block);
+    Note parseNote(std::string note);
 
 }; // class App;
 

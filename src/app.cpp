@@ -122,7 +122,7 @@ int App::parseBlocks() {
 } // int App::parseBlocks();
 
 int App::parseBlock(std::vector<std::string>& block) {
-    std::vector<std::vector<std::string>> parsedBlock;
+    std::vector<std::vector<Note>> parsedBlock;
 
     std::string str;
     for(int i = 0; i < block.size(); i++) {
@@ -130,7 +130,7 @@ int App::parseBlock(std::vector<std::string>& block) {
 
         std::istringstream line(block[i]);
         while(line >> str) {
-            parsedBlock.back().push_back(str);
+            parsedBlock.back().push_back(parseNote(str));
 
         } // while(line >> str);
 
@@ -140,3 +140,9 @@ int App::parseBlock(std::vector<std::string>& block) {
     return 0;
 
 } // int App::parseBlock(std::vector<std::string> block);
+
+Note App::parseNote(std::string note) {
+    std::regex r("(\\d*\\.?\\d+)([a-gA-G][',]?)(\\d*)");
+    return note + (std::regex_match(note, r) ? "YAY" : "OHH");
+
+} // Note App::parseNote(std::string note);
