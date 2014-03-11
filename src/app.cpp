@@ -130,7 +130,14 @@ int App::parseBlock(std::vector<std::string>& block) {
 
         std::istringstream line(block[i]);
         while(line >> str) {
-            parsedBlock.back().push_back(parseNote(str));
+            Note n;
+            if(parseNote(str, n) < 0) {
+                std::cerr << "Error: \"" << str << "\" invalid" << std::endl;
+                return -1;
+
+            } // if(parseNote(str, n) < 0);
+
+            parsedBlock.back().push_back(n);
 
         } // while(line >> str);
 
@@ -141,8 +148,28 @@ int App::parseBlock(std::vector<std::string>& block) {
 
 } // int App::parseBlock(std::vector<std::string> block);
 
-Note App::parseNote(std::string note) {
+int App::parseNote(std::string note, Note& ret) {
     std::regex r("(\\d*\\.?\\d+)([a-gA-G][',]?)(\\d*)");
-    return note + (std::regex_match(note, r) ? "YAY" : "OHH");
+    std::smatch m;
 
-} // Note App::parseNote(std::string note);
+    if(!std::regex_match(note, m, r)) {
+        return -1;
+
+    } // if(!std::regex_match(note, m, r));
+
+    ret = "{";
+    for(int i = 1; i < m.size(); i++) {
+        ret += m[i];
+
+        if(i < m.size() - 1) {
+            ret += ":";
+
+        } // if(i < m.size() - 1);
+
+    } // for(int i = 0; i < m.size(); i++);
+    
+    ret += "}";
+
+    return 0;
+
+} // int App::parseNote(std::string note, Note& ret);
