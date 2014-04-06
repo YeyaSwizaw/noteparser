@@ -44,7 +44,7 @@ int App::run(int argc, char* argv[]) {
     for(auto& block : parsedBlocks) {
         for(auto& row : block) {
             for(auto& s : row) {
-                std::cout << s << "; ";
+                std::cout << s << " ";
 
             } // for(auto& s : row);
 
@@ -126,7 +126,7 @@ int App::parseBlock(std::vector<std::string>& block) {
 
     std::string str;
     for(int i = 0; i < block.size(); i++) {
-        parsedBlock.push_back(std::vector<std::string>());
+        parsedBlock.push_back(std::vector<Note>());
 
         std::istringstream line(block[i]);
         while(line >> str) {
@@ -143,13 +143,39 @@ int App::parseBlock(std::vector<std::string>& block) {
 
     } // for(int i = 0; i < block.size(); i++);
 
+    double blockDuration = -1;
+    double chanDuration;
+    for(auto& chan : parsedBlock) {
+        chanDuration = 0;
+        for(auto& note : chan) {
+            chanDuration += note.duration;
+
+        } // for(auto& note : chan);
+
+        if(blockDuration == -1) {
+            blockDuration = chanDuration;
+
+        } // if(blockDuration == -1);
+        else if(chanDuration != blockDuration) {
+            std::cerr << "Error: channel duration incorrect" << std::endl;;
+            std::cerr << "Expected: " << blockDuration << " Actually: " << chanDuration << std::endl;
+            for(auto& note : chan) {
+                std::cerr << note << " ";
+
+            } // for(auto& note : chan);
+            std::cerr << std::endl;
+
+        } // else if(chanDuration != blockDuration);
+
+    } // for(auto& chan : parsedBlock);
+
     parsedBlocks.push_back(parsedBlock);
     return 0;
 
 } // int App::parseBlock(std::vector<std::string> block);
 
 int App::parseNote(std::string note, Note& ret) {
-    std::regex r("(\\d*\\.?\\d+)([a-gA-G][',]?)(\\d*)");
+    std::regex r("(\\d*\\.?\\d+)?([a-gA-G][',]?)(\\d*)");
     std::smatch m;
 
     if(!std::regex_match(note, m, r)) {
@@ -157,19 +183,18 @@ int App::parseNote(std::string note, Note& ret) {
 
     } // if(!std::regex_match(note, m, r));
 
-    ret = "{";
-    for(int i = 1; i < m.size(); i++) {
-        ret += m[i];
+    else {
+        ret.duration = std::stod(((std::string)m[1]).empty() ? "1" : (std::string)m[1]);
+        ret.note = m[2];
+        ret.octave = std::stoi(m[3]);
 
-        if(i < m.size() - 1) {
-            ret += ":";
-
-        } // if(i < m.size() - 1);
-
-    } // for(int i = 0; i < m.size(); i++);
-    
-    ret += "}";
+    } // else;
 
     return 0;
 
 } // int App::parseNote(std::string note, Note& ret);
+
+std::ostream& operator<<(std::ostream& o, Note n) {
+    return o << "{" << n.duration << ":" << n.note << ":" << n.octave << "}";
+
+} // std::ostream& operator<<(std::ostream& o, Note n);

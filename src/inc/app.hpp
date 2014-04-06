@@ -10,7 +10,12 @@
 
 #include "defines.hpp"
 
-typedef std::string Note;
+struct Note {
+    double duration;
+    std::string note;
+    int octave;
+
+}; // struct Note;
 
 class App {
 public:
@@ -28,5 +33,7 @@ private:
     int parseNote(std::string note, Note& ret);
 
 }; // class App;
+
+std::ostream& operator<<(std::ostream& o, Note n);
 
 #endif // NP_APP_HPP
