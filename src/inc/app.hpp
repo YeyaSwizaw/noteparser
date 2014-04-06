@@ -1,6 +1,8 @@
 #ifndef NP_APP_HPP
 #define NP_APP_HPP
 
+#include <cmath>
+#include <map>
 #include <fstream>
 #include <iostream>
 #include <regex>
@@ -15,7 +17,26 @@ struct Note {
     std::string note;
     int octave;
 
+    double hertz;
+    int milliseconds;
+
 }; // struct Note;
+
+const std::map<std::string, int> stepsFromAMap = {
+    { "a", 0 },
+    { "a'", 1 }, { "b,", 1 },
+    { "b", 2 },
+
+    { "c", -9 },
+    { "c'", -8 }, { "d,", -8 },
+    { "d", -7 }, 
+    { "d'", -6 }, { "e,", -6 },
+    { "e", -5 },
+    { "f", -4 },
+    { "f'", -3 }, { "g,", -3 },
+    { "g", -2 },
+    { "g'", -1 }, { "a,", -1 }
+};
 
 class App {
 public:
@@ -31,6 +52,7 @@ private:
     int parseBlocks();
     int parseBlock(std::vector<std::string>& block);
     int parseNote(std::string note, Note& ret);
+    int calculateFrequencies();
 
 }; // class App;
 
