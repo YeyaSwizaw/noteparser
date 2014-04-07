@@ -9,6 +9,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include "defines.hpp"
 
@@ -18,7 +19,6 @@ struct Note {
     int octave;
 
     double hertz;
-    int milliseconds;
 
 }; // struct Note;
 
@@ -35,7 +35,21 @@ const std::map<std::string, int> stepsFromAMap = {
     { "f", -4 },
     { "f'", -3 }, { "g,", -3 },
     { "g", -2 },
-    { "g'", -1 }, { "a,", -1 }
+    { "g'", -1 }, { "a,", -1 },
+
+    { "A", 0 },
+    { "A'", 1 }, { "B,", 1 },
+    { "B", 2 },
+
+    { "C", -9 },
+    { "C'", -8 }, { "D,", -8 },
+    { "D", -7 }, 
+    { "D'", -6 }, { "E,", -6 },
+    { "E", -5 },
+    { "F", -4 },
+    { "F'", -3 }, { "G,", -3 },
+    { "G", -2 },
+    { "G'", -1 }, { "A,", -1 }
 };
 
 class App {
@@ -47,7 +61,10 @@ private:
     std::vector<std::vector<std::string>> blocks;
     std::vector<std::vector<std::vector<Note>>> parsedBlocks;
 
+    int noteDuration;
+
     int parseArgs(int argc, char* argv[], std::string& ifname, std::string& ofname);
+    void displayHelp(std::ostream& out);
     int readInput(std::ifstream& ifile);
     int parseBlocks();
     int parseBlock(std::vector<std::string>& block);

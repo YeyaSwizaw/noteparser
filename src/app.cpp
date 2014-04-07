@@ -10,11 +10,12 @@ int App::run(int argc, char* argv[]) {
     std::string ifname, ofname;
     if(parseArgs(argc, argv, ifname, ofname) < 0) {
         return -1;
-
     }
 
     std::cout << "Input: " << ifname << std::endl;
     std::cout << "Output: " << ofname << std::endl;
+
+    std::cout << "Note Duration: " << noteDuration << std::endl;
 
     /* Open input file */
     std::ifstream ifile;
@@ -50,15 +51,12 @@ int App::run(int argc, char* argv[]) {
         for(auto& row : block) {
             for(auto& s : row) {
                 std::cout << s << " ";
-
             }
 
             std::cout << std::endl;
-
             }
     
         std::cout << std::endl;
-
     }
 
     return 0;
@@ -66,11 +64,51 @@ int App::run(int argc, char* argv[]) {
 }
 
 int App::parseArgs(int argc, char* argv[], std::string& ifname, std::string& ofname) {
+    auto getOptionValue = [&argv, &argc](std::string&& opt) {
+        char** itr = std::find(argv, argv + argc, opt);
+        if(itr != (argv + argc) && ++itr != (argv + argc)) {
+            return *itr;
+        }
+        return (char*)nullptr;
+    };
+
+    auto checkSingleOption = [&argv, &argc](std::string&& opt) {
+        return std::find(argv, argv + argc, opt) != argv + argc;
+    };
+
+    if(checkSingleOption("-h") || checkSingleOption("--help")) {
+        displayHelp(std::cout);
+        return -1;
+    }
+        
     if(argc < 3) {
         std::cerr << "Not enough arguments provided" << std::endl;
-        std::cerr << "Usage: " << NP_PROGNAME << " [OPTIONS] infile outfile" << std::endl;
+        displayHelp(std::cerr);
         return -1;
+    }
 
+    noteDuration = -1;
+
+    char* bpmOpt = getOptionValue(std::string("--bpm"));
+    if(bpmOpt) {
+        int bpm = std::stoi(std::string(bpmOpt));
+        double bps = bpm / 60.0;
+        double spb = 1 / bps;
+        noteDuration = spb * 1000;
+    }
+
+    char* tempoOpt = getOptionValue(std::string("--tempo"));
+    if(tempoOpt) {
+        int bpm = std::stoi(std::string(tempoOpt));
+        double bps = bpm / 60.0;
+        double spb = 1 / bps;
+        noteDuration = spb * 1000;
+    }
+
+    if(noteDuration <= 0) {
+        std::cerr << "Error: need tempo" << std::endl;
+        displayHelp(std::cerr);
+        return -1;
     }
 
     ofname = argv[argc - 1];
@@ -78,6 +116,16 @@ int App::parseArgs(int argc, char* argv[], std::string& ifname, std::string& ofn
 
     return 0;
 
+}
+
+void App::displayHelp(std::ostream& out) {
+    out << "Usage: " << NP_PROGNAME << " [OPTIONS] infile outfile" << std::endl;
+    out << "Required Options: " << std::endl;
+    out << "    --bpm [bpm] OR --tempo [bpm]" << std::endl;
+    out << "        Sets the track speed to a specific bpm" << std::endl;
+    out << "Optional: " << std::endl;
+    out << "    -h OR --help" << std::endl;
+    out << "        Displays this help and exits." << std::endl;
 }
 
 int App::readInput(std::ifstream& ifile) {
@@ -188,7 +236,7 @@ int App::parseNote(std::string note, Note& ret) {
     }
 
     else {
-        ret.duration = std::stod(((std::string)m[1]).empty() ? "1" : (std::string)m[1]);
+        ret.duration = noteDuration * (std::stod(((std::string)m[1]).empty() ? "1" : (std::string)m[1]));
         ret.note = m[2];
         ret.octave = std::stoi(m[3]);
     }
